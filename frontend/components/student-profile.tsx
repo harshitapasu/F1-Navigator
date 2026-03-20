@@ -21,6 +21,8 @@ export function StudentProfile() {
     degree: student?.degree || ("Bachelor" as const),
     year: student?.year || 1,
     visaStatus: student?.visaStatus || ("F-1" as const),
+    countryOfCitizenship: student?.countryOfCitizenship || "",
+    graduationDate: student?.graduationDate || "",
   })
 
   const handleSave = async () => {
@@ -31,6 +33,8 @@ export function StudentProfile() {
       degree: formData.degree,
       year: formData.year,
       visaStatus: formData.visaStatus,
+      countryOfCitizenship: formData.countryOfCitizenship,
+      graduationDate: formData.graduationDate,
     })
     setIsEditing(false)
     setSaved(true)
@@ -124,6 +128,20 @@ export function StudentProfile() {
                 <p className="rounded-lg bg-secondary px-3 py-2 text-sm">{formData.major || "Not set"}</p>
               )}
             </div>
+
+            {/* Country of Citizenship */}
+            <div>
+              <label className="mb-2 block text-sm font-medium">Country of Citizenship</label>
+              {isEditing ? (
+                <Input
+                  value={formData.countryOfCitizenship}
+                  onChange={(e) => setFormData({ ...formData, countryOfCitizenship: e.target.value })}
+                  placeholder="e.g., India, China, Brazil"
+                />
+              ) : (
+                <p className="rounded-lg bg-secondary px-3 py-2 text-sm">{formData.countryOfCitizenship || "Not set"}</p>
+              )}
+            </div>
           </div>
         </Card>
 
@@ -190,6 +208,26 @@ export function StudentProfile() {
                 </Select>
               ) : (
                 <p className="rounded-lg bg-secondary px-3 py-2 text-sm">{formData.visaStatus}</p>
+              )}
+            </div>
+
+            {/* Expected / Actual Graduation Date */}
+            <div>
+              <label className="mb-2 block text-sm font-medium">Expected / Actual Graduation Date</label>
+              {isEditing ? (
+                <Input
+                  type="date"
+                  value={formData.graduationDate}
+                  onChange={(e) => setFormData({ ...formData, graduationDate: e.target.value })}
+                />
+              ) : (
+                <p className="rounded-lg bg-secondary px-3 py-2 text-sm">
+                  {formData.graduationDate
+                    ? new Date(formData.graduationDate + "T00:00:00").toLocaleDateString("en-US", {
+                        month: "long", day: "numeric", year: "numeric",
+                      })
+                    : "Not set"}
+                </p>
               )}
             </div>
 

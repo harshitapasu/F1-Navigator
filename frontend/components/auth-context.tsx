@@ -12,6 +12,8 @@ export interface StudentData {
   degree: string
   year: number
   visaStatus: string
+  countryOfCitizenship: string
+  graduationDate: string
   documents: DocumentFile[]
 }
 
@@ -40,6 +42,8 @@ function mapUser(user: UserData, docs: DocumentRecord[]): StudentData {
     degree: user.degree_level ?? "Bachelor",
     year: parseInt(user.year_of_study ?? "1") || 1,
     visaStatus: user.visa_status ?? "F-1",
+    countryOfCitizenship: user.country_of_citizenship ?? "",
+    graduationDate: user.graduation_date ?? "",
     documents: docs.map((d) => ({
       id: d.id,
       name: d.name,
@@ -111,6 +115,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       degree_level: data.degree,
       year_of_study: data.year != null ? String(data.year) : undefined,
       visa_status: data.visaStatus,
+      country_of_citizenship: data.countryOfCitizenship,
+      graduation_date: data.graduationDate,
     })
     if (student) {
       setStudent({
@@ -121,6 +127,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         degree: updated.degree_level ?? student.degree,
         year: parseInt(updated.year_of_study ?? String(student.year)) || student.year,
         visaStatus: updated.visa_status ?? student.visaStatus,
+        countryOfCitizenship: updated.country_of_citizenship ?? student.countryOfCitizenship,
+        graduationDate: updated.graduation_date ?? student.graduationDate,
       })
     }
   }

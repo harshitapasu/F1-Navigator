@@ -437,12 +437,94 @@ const processData: Record<ProcessType, { title: string; description: string; tot
   }
 }
 
+// ── Personalized date helpers ────────────────────────────────────────────────
+
+function addDays(d: Date, days: number): Date {
+  const r = new Date(d); r.setDate(r.getDate() + days); return r
+}
+function addMonths(d: Date, months: number): Date {
+  const r = new Date(d); r.setMonth(r.getMonth() + months); return r
+}
+function fmtDate(d: Date): string {
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+}
+
+interface KeyDate {
+  label: string
+  date: string
+  style: "blue" | "green" | "amber" | "red" | "primary"
+}
+
+function computeKeyDates(gradDateStr: string, process: ProcessType): KeyDate[] {
+  const grad = new Date(gradDateStr + "T00:00:00")
+  if (isNaN(grad.getTime())) return []
+
+  if (process === "opt") {
+    const earliest = addDays(grad, -90)
+    const optExpiry = addMonths(grad, 12)
+    return [
+      { label: "Earliest OPT application (90 days before graduation)", date: fmtDate(earliest), style: "blue" },
+      { label: "Graduation / program end date", date: fmtDate(grad), style: "primary" },
+      { label: "OPT expiration (12 months from graduation)", date: fmtDate(optExpiry), style: "amber" },
+    ]
+  }
+
+  if (process === "stem-opt") {
+    const optExpiry = addMonths(grad, 12)
+    const stemEarliest = addDays(optExpiry, -90)
+    const eval12mo = addMonths(grad, 24)
+    const stemExpiry = addMonths(grad, 36)
+    return [
+      { label: "Earliest STEM OPT application (90 days before OPT expiry)", date: fmtDate(stemEarliest), style: "blue" },
+      { label: "OPT expiry / STEM OPT start window", date: fmtDate(optExpiry), style: "primary" },
+      { label: "12-month self-evaluation due", date: fmtDate(eval12mo), style: "amber" },
+      { label: "STEM OPT expiration (24 months)", date: fmtDate(stemExpiry), style: "red" },
+    ]
+  }
+
+  if (process === "cpt") {
+    return [
+      { label: "CPT must end by graduation", date: fmtDate(grad), style: "primary" },
+      { label: "12+ months full-time CPT makes you ineligible for OPT", date: "Stay under 12 months", style: "red" },
+    ]
+  }
+
+  if (process === "h1b") {
+    // First H1B lottery year: next March after graduation
+    const lotteryYear = grad < new Date(grad.getFullYear(), 2, 1)
+      ? grad.getFullYear()
+      : grad.getFullYear() + 1
+    const sponsorStart = new Date(lotteryYear - 1, 9, 1) // Oct 1 prior year
+    const sponsorEnd   = new Date(lotteryYear, 1, 28)    // Feb 28 lottery year
+    const h1bStart     = new Date(lotteryYear, 9, 1)     // Oct 1 lottery year
+    return [
+      { label: "Find H-1B sponsor", date: `${fmtDate(sponsorStart)} – ${fmtDate(sponsorEnd)}`, style: "blue" },
+      { label: "H-1B lottery registration", date: `March ${lotteryYear}`, style: "primary" },
+      { label: "File I-129 petition (if selected)", date: `Apr 1 – Jun 30, ${lotteryYear}`, style: "amber" },
+      { label: "Earliest H-1B start date", date: fmtDate(h1bStart), style: "green" },
+    ]
+  }
+
+  return []
+}
+
+const keyDateStyles: Record<KeyDate["style"], string> = {
+  blue:    "border-blue-300 bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300",
+  green:   "border-green-300 bg-green-50 text-green-700 dark:bg-green-950/40 dark:text-green-300",
+  amber:   "border-amber-300 bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300",
+  red:     "border-red-300 bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-300",
+  primary: "border-primary/40 bg-primary/5 text-primary",
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 interface FlowchartProps {
   externalProcess?: ProcessType
   onProcessChange?: (p: ProcessType) => void
+  graduationDate?: string
 }
 
-export function WorkAuthorizationFlowchart({ externalProcess, onProcessChange }: FlowchartProps) {
+export function WorkAuthorizationFlowchart({ externalProcess, onProcessChange, graduationDate }: FlowchartProps) {
   const [internalProcess, setInternalProcess] = useState<ProcessType>("cpt")
   const [expandedSteps, setExpandedSteps] = useState<string[]>([])
   const [completedSteps, setCompletedSteps] = useState<string[]>([])
@@ -527,6 +609,34 @@ export function WorkAuthorizationFlowchart({ externalProcess, onProcessChange }:
                       {currentProcess.totalTime}
                     </Badge>
                   </div>
+
+                  {/* Personalized timeline panel */}
+                  {graduationDate && (() => {
+                    const keyDates = computeKeyDates(graduationDate, activeProcess)
+                    if (!keyDates.length) return null
+                    const gradFormatted = new Date(graduationDate + "T00:00:00").toLocaleDateString("en-US", {
+                      month: "long", day: "numeric", year: "numeric",
+                    })
+                    return (
+                      <div className="mt-4 rounded-lg border border-primary/20 bg-primary/5 p-4">
+                        <h4 className="mb-3 flex items-center gap-2 text-sm font-semibold text-primary">
+                          <CalendarDays className="h-4 w-4" />
+                          Your Personalized Timeline
+                          <span className="ml-1 font-normal text-muted-foreground">— based on {gradFormatted} graduation</span>
+                        </h4>
+                        <div className="space-y-2">
+                          {keyDates.map((item, i) => (
+                            <div key={i} className="flex flex-wrap items-center gap-2">
+                              <span className={`inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium ${keyDateStyles[item.style]}`}>
+                                {item.date}
+                              </span>
+                              <span className="text-xs text-muted-foreground">{item.label}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  })()}
                 </CardHeader>
                 <CardContent>
                   <div className="relative">

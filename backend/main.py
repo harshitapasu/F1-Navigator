@@ -84,13 +84,15 @@ class LoginRequest(BaseModel):
 
 
 class ProfileUpdate(BaseModel):
-    name:             Optional[str] = None
-    university:       Optional[str] = None
-    major:            Optional[str] = None
-    degree_level:     Optional[str] = None
-    year_of_study:    Optional[str] = None
-    visa_status:      Optional[str] = None
-    country_of_origin: Optional[str] = None
+    name:                   Optional[str] = None
+    university:             Optional[str] = None
+    major:                  Optional[str] = None
+    degree_level:           Optional[str] = None
+    year_of_study:          Optional[str] = None
+    visa_status:            Optional[str] = None
+    country_of_origin:      Optional[str] = None
+    country_of_citizenship: Optional[str] = None
+    graduation_date:        Optional[str] = None
 
 
 class ChatRequest(BaseModel):

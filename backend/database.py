@@ -66,7 +66,8 @@ class Database:
         async with self.pool.acquire() as conn:
             row = await conn.fetchrow(
                 """SELECT name, university, major, degree_level,
-                          year_of_study, visa_status, country_of_origin
+                          year_of_study, visa_status, country_of_origin,
+                          country_of_citizenship, graduation_date
                    FROM student_profiles WHERE user_id = $1::uuid""",
                 user_id,
             )

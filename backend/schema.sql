@@ -21,8 +21,10 @@ CREATE TABLE IF NOT EXISTS student_profiles (
     degree_level     VARCHAR(50),   -- Bachelor, Master, PhD, Other
     year_of_study    VARCHAR(50),   -- "Year 1", "Year 2", etc.
     visa_status      VARCHAR(50),   -- F-1, OPT, STEM-OPT, H-1B, Other
-    country_of_origin VARCHAR(100),
-    updated_at       TIMESTAMPTZ DEFAULT NOW()
+    country_of_origin      VARCHAR(100),
+    country_of_citizenship VARCHAR(100),
+    graduation_date        VARCHAR(20),   -- YYYY-MM-DD format
+    updated_at             TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- ── Documents ─────────────────────────────────────────────────────────────────

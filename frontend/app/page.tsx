@@ -33,7 +33,7 @@ const navItems = [
 ]
 
 function HomeContent() {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, student } = useAuth()
   const [activeView, setActiveView] = useState<ActiveView>("flowchart")
 
   if (!isAuthenticated) return <LoginSignup />
@@ -141,7 +141,7 @@ function HomeContent() {
               ? <AIAssistant />
               : (
                 <div className="mx-auto max-w-4xl px-6 py-8 pr-8">
-                  {activeView === "flowchart"  && <WorkAuthorizationFlowchart />}
+                  {activeView === "flowchart"  && <WorkAuthorizationFlowchart graduationDate={student?.graduationDate} />}
                   {activeView === "news"       && <PolicyNews />}
                   {activeView === "profile"    && <StudentProfile />}
                   {activeView === "documents"  && <DocumentStorage />}
