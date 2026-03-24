@@ -16,13 +16,13 @@ CACHE_TTL = timedelta(hours=1)
 
 # ── Search queries covering all F-1 relevant topics ───────────────────────────
 SEARCH_QUERIES = [
-    "F1 student visa OPT authorization 2025 2026 USCIS update",
-    "STEM OPT extension F1 student 2025 2026 DHS rule",
-    "CPT curricular practical training F1 student 2025 2026",
-    "H-1B lottery cap registration F1 student 2025 2026",
-    "USCIS F1 student immigration policy change 2025 2026",
+    "F1 student visa OPT authorization USCIS update 2026",
+    "STEM OPT extension F1 student DHS rule 2026",
+    "CPT curricular practical training F1 student 2026",
+    "H-1B lottery cap registration F1 student 2026",
+    "USCIS F1 student immigration policy change 2026",
     "SEVIS F1 student visa fee rule update 2026",
-    "on campus employment F1 student international 2025 2026",
+    "international student visa policy news 2026",
 ]
 
 
@@ -36,7 +36,7 @@ def _fetch_ddg_sync() -> list[dict]:
     with DDGS() as ddgs:
         for query in SEARCH_QUERIES:
             try:
-                results = ddgs.news(query, max_results=5, timelimit="m")
+                results = ddgs.news(query, max_results=10, timelimit="m")
                 for r in results:
                     url = r.get("url", "")
                     if url and url not in seen_urls:
@@ -63,7 +63,10 @@ async def fetch_f1_news() -> list[dict]:
 
     try:
         loop = asyncio.get_event_loop()
-        raw = await loop.run_in_executor(None, _fetch_ddg_sync)
+        raw = await asyncio.wait_for(
+            loop.run_in_executor(None, _fetch_ddg_sync),
+            timeout=25.0,
+        )
     except Exception:
         return _cache["articles"] or []
 
@@ -119,6 +122,25 @@ async def fetch_f1_news() -> list[dict]:
 
         result = json.loads(resp.choices[0].message.content)
         articles: list[dict] = result.get("articles", [])
+
+        # Sort newest-first by date, falling back to original order for unparseable dates
+        def _parse_date(a: dict):
+            from datetime import datetime as dt, timezone
+            raw = a.get("date", "")
+            try:
+                # Handles ISO 8601 with or without timezone
+                parsed = dt.fromisoformat(raw.replace("Z", "+00:00"))
+                return parsed.astimezone(timezone.utc).replace(tzinfo=None)
+            except Exception:
+                pass
+            for fmt in ("%Y-%m-%d", "%B %d, %Y", "%b %d, %Y"):
+                try:
+                    return dt.strptime(raw[:10], fmt)
+                except Exception:
+                    continue
+            return dt.min
+
+        articles.sort(key=_parse_date, reverse=True)
 
         # Add sequential ids
         for i, a in enumerate(articles):
