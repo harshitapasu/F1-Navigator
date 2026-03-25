@@ -114,7 +114,7 @@ export function AIAssistant({ sessionId, onSessionCreate }: AIAssistantProps) {
     ])
 
     try {
-      const history = messages.map((m) => ({ role: m.role, content: m.content }))
+      const history = messages.slice(-6).map((m) => ({ role: m.role, content: m.content }))
 
       for await (const event of chatStream(trimmed, history)) {
         if (event.type === "token") {
