@@ -152,7 +152,7 @@ export function I765Form({ formType, onBack }: I765FormProps) {
   )
 
   return (
-    <div className="flex-1 overflow-y-auto bg-background [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border hover:[&::-webkit-scrollbar-thumb]:bg-muted-foreground/40 print:overflow-visible print:h-auto">
+    <div className="flex-1 overflow-x-hidden overflow-y-auto bg-background [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border hover:[&::-webkit-scrollbar-thumb]:bg-muted-foreground/40 print:overflow-visible print:h-auto">
       {/* Top bar */}
       <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-background px-6 py-3 print:hidden">
         <button onClick={onBack} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
@@ -168,7 +168,7 @@ export function I765Form({ formType, onBack }: I765FormProps) {
         </div>
       </div>
 
-      <div ref={printRef} className="mx-auto max-w-4xl px-6 py-8">
+      <div ref={printRef} className="mx-auto max-w-4xl px-3 py-4 sm:px-6 sm:py-8">
         {/* Header */}
         <div className="mb-6 rounded-lg border border-border bg-primary/5 p-4">
           <div className="flex items-start justify-between">
@@ -204,7 +204,7 @@ export function I765Form({ formType, onBack }: I765FormProps) {
           <h2 className="mb-4 border-b pb-2 text-sm font-bold uppercase tracking-wide">Part 2. Information About You</h2>
 
           <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Your Full Legal Name</h3>
-          <div className="mb-5 grid grid-cols-3 gap-3">
+          <div className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
             <Field label="1.a. Family Name (Last Name)" fromProfile={!!autoLast} required>
               {inp("lastName", "Last name", !!autoLast)}
             </Field>
@@ -221,7 +221,7 @@ export function I765Form({ formType, onBack }: I765FormProps) {
             { l: "otherName1Last", f: "otherName1First", m: "otherName1Middle", n: "2" },
             { l: "otherName2Last", f: "otherName2First", m: "otherName2Middle", n: "3" },
           ].map((row) => (
-            <div key={row.n} className="mb-3 grid grid-cols-3 gap-3">
+            <div key={row.n} className="mb-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
               <Field label={`${row.n}.a. Family Name`}>{inp(row.l, "Last name")}</Field>
               <Field label={`${row.n}.b. Given Name`}>{inp(row.f, "First name")}</Field>
               <Field label={`${row.n}.c. Middle Name`}>{inp(row.m, "Middle name")}</Field>
@@ -237,7 +237,7 @@ export function I765Form({ formType, onBack }: I765FormProps) {
               {inp("mailingApt", "e.g., Unit 202", !!student?.mailingApt)}
             </Field>
           </div>
-          <div className="mb-4 grid grid-cols-3 gap-3">
+          <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
             <Field label="5.d. City or Town" fromProfile={!!student?.mailingCity} required>
               {inp("mailingCity", "City", !!student?.mailingCity)}
             </Field>
@@ -335,7 +335,7 @@ export function I765Form({ formType, onBack }: I765FormProps) {
           </div>
 
           <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Place of Birth</h3>
-          <div className="mb-4 grid grid-cols-3 gap-3">
+          <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
             <Field label="19.a. City / Town / Village" fromProfile={!!student?.birthCity} required>
               {inp("birthCity", "Birth city", !!student?.birthCity)}
             </Field>
@@ -374,7 +374,7 @@ export function I765Form({ formType, onBack }: I765FormProps) {
               {inp("passportCountry", "e.g., India")}
             </Field>
           </div>
-          <div className="mb-3 grid grid-cols-3 gap-3">
+          <div className="mb-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
             <Field label="21.e. Passport Expiration Date (mm/dd/yyyy)" required>
               <Input type="date" value={form.passportExpiry} onChange={(e) => set("passportExpiry", e.target.value)} className="h-8 text-sm" />
             </Field>

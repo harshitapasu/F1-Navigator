@@ -163,7 +163,7 @@ export function AIAssistant({ sessionId, onSessionCreate }: AIAssistantProps) {
 
   // ── Shared input box ────────────────────────────────────────────────────────
   const InputBox = (
-    <div className={hasMessages ? "border-t border-border/40 bg-background px-4 pb-4 pt-3" : ""}>
+    <div className={hasMessages ? "border-t border-border/40 bg-background px-2 sm:px-4 pb-4 pt-3" : ""}>
       <div className={`mx-auto ${hasMessages ? "max-w-3xl" : "w-full max-w-2xl"}`}>
         <div className="relative flex items-end gap-2 rounded-2xl border border-border bg-secondary/40 px-4 py-3 shadow-sm focus-within:border-primary/40 focus-within:ring-1 focus-within:ring-primary/20 transition-all">
           <textarea
@@ -236,7 +236,7 @@ export function AIAssistant({ sessionId, onSessionCreate }: AIAssistantProps) {
           [&::-webkit-scrollbar-thumb]:bg-border
           hover:[&::-webkit-scrollbar-thumb]:bg-muted-foreground/40"
       >
-        <div className="mx-auto max-w-3xl space-y-6">
+        <div className="mx-auto max-w-3xl space-y-6 px-2 sm:px-0">
           {messages.map((msg) => (
             <div key={msg.id} className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
 

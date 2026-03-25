@@ -80,6 +80,10 @@ function HomeContent() {
     } catch {}
   }, [])
 
+  useEffect(() => {
+    if (window.innerWidth < 768) setSidebarOpen(false)
+  }, [])
+
   const handleNewChat = () => {
     const mountKey = `new-${Date.now()}`
     setChatInstances((prev) => [...prev, { mountKey, sessionId: null }])
@@ -149,7 +153,8 @@ function HomeContent() {
 
       {/* ── Sidebar ─────────────────────────────────────────────────────────── */}
       <aside className={cn(
-        "flex flex-col border-r border-border/50 bg-muted/30 transition-all duration-200 print:hidden",
+        "flex flex-col border-r border-border/50 transition-all duration-200 print:hidden",
+        "fixed inset-y-0 left-0 z-40 bg-background md:relative md:z-auto md:bg-muted/30",
         sidebarOpen ? "w-64" : "w-0 overflow-hidden border-r-0"
       )}>
 
@@ -280,6 +285,14 @@ function HomeContent() {
         </div>
       </aside>
 
+      {/* Mobile overlay to close sidebar */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-black/40 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* ── Main ────────────────────────────────────────────────────────────── */}
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden print:overflow-visible">
 
@@ -326,7 +339,7 @@ function HomeContent() {
         )}
 
         {activeView !== "chat" && activeView !== "i765" && (
-          <div className="flex-1 overflow-y-auto px-6 py-8 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border hover:[&::-webkit-scrollbar-thumb]:bg-muted-foreground/40">
+          <div className="flex-1 overflow-y-auto px-3 py-4 sm:px-6 sm:py-8 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border hover:[&::-webkit-scrollbar-thumb]:bg-muted-foreground/40">
             <div className="mx-auto max-w-4xl">
               {activeView === "flowchart"  && (
                 <WorkAuthorizationFlowchart

@@ -105,7 +105,7 @@ export function StudentProfile() {
 
   return (
     <section className="py-2">
-      <div className="mb-8 flex items-center justify-between">
+      <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="flex items-center gap-3 text-3xl font-bold tracking-tight">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">

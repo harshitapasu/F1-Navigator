@@ -577,7 +577,7 @@ export function WorkAuthorizationFlowchart({ externalProcess, onProcessChange, g
 
         <div>
           <Tabs value={activeProcess} onValueChange={(v) => setActiveProcess(v as ProcessType)}>
-            <TabsList className="mb-8 grid w-full grid-cols-4">
+            <TabsList className="mb-8 grid w-full grid-cols-2 sm:grid-cols-4">
               <TabsTrigger value="cpt" className="gap-2">
                 <Building2 className="h-4 w-4" />
                 <span>CPT</span>
@@ -633,10 +633,10 @@ export function WorkAuthorizationFlowchart({ externalProcess, onProcessChange, g
                     })
                     return (
                       <div className="mt-4 rounded-lg border border-primary/20 bg-primary/5 p-4">
-                        <h4 className="mb-3 flex items-center gap-2 text-sm font-semibold text-primary">
+                        <h4 className="mb-3 flex flex-wrap items-center gap-2 text-sm font-semibold text-primary">
                           <CalendarDays className="h-4 w-4" />
                           Your Personalized Timeline
-                          <span className="ml-1 font-normal text-muted-foreground">— based on {gradFormatted} graduation</span>
+                          <span className="font-normal text-muted-foreground">— based on {gradFormatted} graduation</span>
                         </h4>
                         <div className="space-y-2">
                           {keyDates.map((item, i) => (
@@ -652,7 +652,7 @@ export function WorkAuthorizationFlowchart({ externalProcess, onProcessChange, g
                     )
                   })()}
                 </CardHeader>
-                <CardContent>
+                <CardContent className="overflow-x-hidden">
                   <div className="relative">
                     {/* Timeline line */}
                     <div className="absolute left-4 top-0 hidden h-full w-0.5 bg-border sm:block" />
@@ -685,29 +685,31 @@ export function WorkAuthorizationFlowchart({ externalProcess, onProcessChange, g
                               </button>
                             </div>
 
-                            <div className="flex-1">
+                            <div className="min-w-0 flex-1">
                               <CollapsibleTrigger asChild>
                                 <Button
                                   variant="ghost"
                                   className="h-auto w-full justify-start p-4 text-left hover:bg-secondary/50"
                                 >
-                                  <div className="flex flex-1 items-start justify-between gap-4">
-                                    <div className="flex-1">
+                                  <div className="flex w-full items-start justify-between gap-2">
+                                    <div className="min-w-0 flex-1">
                                       <div className="flex flex-wrap items-center gap-2">
                                         <span className={`font-semibold ${completedSteps.includes(step.id) ? 'text-green-600' : ''}`}>{step.title}</span>
                                         <Badge variant="outline" className="text-xs">
                                           {step.timeline}
                                         </Badge>
                                       </div>
-                                      <p className="mt-1 text-sm text-muted-foreground">
+                                      <p className="mt-1 text-sm text-muted-foreground break-words whitespace-normal">
                                         {step.description}
                                       </p>
                                     </div>
-                                    {expandedSteps.includes(step.id) ? (
-                                      <ChevronDown className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
-                                    ) : (
-                                      <ChevronRight className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
-                                    )}
+                                    <div className="flex-shrink-0 pt-0.5">
+                                      {expandedSteps.includes(step.id) ? (
+                                        <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                                      ) : (
+                                        <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                                      )}
+                                    </div>
                                   </div>
                                 </Button>
                               </CollapsibleTrigger>
