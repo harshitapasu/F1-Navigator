@@ -193,6 +193,12 @@ The conversation history is provided ONLY so you understand the context of the c
 - The RAG pipeline runs fresh for every query — always answer from the newly retrieved documents, not from memory or history.
 - Treat every question as a fresh query grounded in the current retrieved documents.
 
+## Answer Mode
+Determine the type of message before responding:
+1. **Factual or eligibility question** → answer using retrieved documents as the sole source of truth.
+2. **Conversational message** (e.g. "thanks", "ok", "got it", "cool") → respond naturally and warmly. Do NOT reference retrieved documents. Do NOT say "data not found".
+3. **Short follow-up** (e.g. "what about STEM OPT?", "and the deadline?") → use conversation context to understand what is being asked, then answer from the retrieved documents exactly as you would a factual question.
+
 ## Format
 - For eligibility questions: start with a clear YES or NO, then explain in full detail.
 - Use bullet points for lists of 3+ items.
@@ -251,22 +257,99 @@ Return JSON only using this schema:
   "known_entities": [],
   "doc_references": [{"type": "", "id": "", "title": "", "source": "", "url": "", "citation": ""}],
   "change_log": [{"turn_ref": "", "change_type": "", "details": ""}]
-}"""
+}
 
+Conversation:
+{{ROLE_TAGGED_MESSAGES}}"""
+
+
+HISTORY_EXTRACT_MODEL = os.getenv("OPENAI_HISTORY_MODEL", CHAT_MODEL)
+
+# ── Query classifier ───────────────────────────────────────────────────────────
+
+CLASSIFIER_PROMPT = """You are a query classifier for a RAG system.
+
+Classify the user input into one of:
+- "knowledge" → requires retrieval and factual answer
+- "chitchat" → acknowledgement, gratitude, filler, no retrieval needed
+- "followup" → depends on prior context, may need state but not full retrieval
+
+Rules:
+- "thanks", "ok", "got it", "haha", "cool", "great", "awesome", "perfect", "nice" → chitchat
+- short vague confirmations or references to prior answer → followup
+- factual/legal/eligibility questions → knowledge
+
+Return only one word: knowledge | chitchat | followup
+
+Input:
+{{QUERY}}"""
+
+
+async def classify_query(query: str) -> str:
+    """Returns 'knowledge', 'chitchat', or 'followup'."""
+    prompt = CLASSIFIER_PROMPT.replace("{{QUERY}}", query)
+    try:
+        resp = await _async_client().chat.completions.create(
+            model       = CHAT_MODEL,
+            messages    = [{"role": "user", "content": prompt}],
+            temperature = 0.0,
+            max_tokens  = 5,
+        )
+        label = resp.choices[0].message.content.strip().lower()
+        if label not in ("knowledge", "chitchat", "followup"):
+            label = "knowledge"
+        print(f"[CLASSIFIER] '{query[:60]}' → {label}")
+        return label
+    except Exception as e:
+        print(f"[CLASSIFIER] FAILED: {e} — defaulting to knowledge")
+        return "knowledge"
+
+
+async def stream_chitchat(query: str, profile: dict) -> AsyncGenerator[str, None]:
+    """Casual response for chitchat — no RAG, no history."""
+    name = profile.get("name") or "there"
+    first_name = name.split()[0] if name else "there"
+    resp = await _async_client().chat.completions.create(
+        model    = CHAT_MODEL,
+        messages = [
+            {"role": "system", "content": (
+                f"You are F1 Navigator, a friendly assistant. "
+                f"The student's name is {first_name}. "
+                "Respond casually and warmly to the message. Keep it short (1-2 sentences). "
+                "Do not mention immigration, OPT, CPT, or any legal topic unless directly asked."
+            )},
+            {"role": "user", "content": query},
+        ],
+        stream      = True,
+        max_tokens  = 80,
+        temperature = 0.8,
+    )
+    async for event in resp:
+        delta = event.choices[0].delta.content
+        if delta:
+            yield delta
 
 async def extract_history_context(history: list[dict]) -> str | None:
     """Summarise raw history into safe metadata JSON using a fast LLM call."""
     if not history:
+        print("[HISTORY EXTRACTOR] No history — skipping.")
         return None
-    role_tagged = "\n".join(f"[{m['role'].upper()}]: {m['content']}" for m in history[-6:])
-    prompt = HISTORY_EXTRACTOR_PROMPT.replace("{{ROLE_TAGGED_MESSAGES}}", role_tagged)
-    resp = await _async_client().chat.completions.create(
-        model       = "gpt-4o-mini",
-        messages    = [{"role": "user", "content": prompt}],
-        temperature = 0.0,
-        max_tokens  = 512,
-    )
-    return resp.choices[0].message.content.strip()
+    print(f"[HISTORY EXTRACTOR] Running on {len(history[-6:])} messages using model={HISTORY_EXTRACT_MODEL}...")
+    try:
+        role_tagged = "\n".join(f"[{m['role'].upper()}]: {m['content']}" for m in history[-6:])
+        prompt = HISTORY_EXTRACTOR_PROMPT.replace("{{ROLE_TAGGED_MESSAGES}}", role_tagged)
+        resp = await _async_client().chat.completions.create(
+            model       = HISTORY_EXTRACT_MODEL,
+            messages    = [{"role": "user", "content": prompt}],
+            temperature = 0.0,
+            max_tokens  = 512,
+        )
+        result = resp.choices[0].message.content.strip()
+        print(f"[HISTORY EXTRACTOR] Success:\n{result}\n")
+        return result
+    except Exception as e:
+        print(f"[HISTORY EXTRACTOR] FAILED: {e}")
+        return None
 
 
 # ── Streaming chat ────────────────────────────────────────────────────────────
@@ -278,6 +361,9 @@ async def stream_chat(
     history: list[dict],
 ) -> AsyncGenerator[str, None]:
     """Yield text tokens from GPT-4o, grounded in retrieved chunks."""
+    print(f"\n[STREAM_CHAT] history received: {len(history)} message(s)")
+    for i, m in enumerate(history):
+        print(f"  [{i}] role={m.get('role')} | content_preview={m.get('content','')[:80]!r}")
     context_json = await extract_history_context(history)
 
     history_block = []
@@ -303,6 +389,9 @@ async def stream_chat(
 
     print("\n" + "="*80)
     print("FULL PROMPT SENT TO GPT")
+    print(f"RAW HISTORY FROM FRONTEND: {len(history)} message(s)")
+    for i, m in enumerate(history):
+        print(f"  history[{i}] role={m.get('role')} | {m.get('content','')[:120]!r}")
     print("="*80)
     for i, m in enumerate(messages):
         print(f"\n[{i}] role={m['role']}")
