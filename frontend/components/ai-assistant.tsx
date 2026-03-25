@@ -57,9 +57,13 @@ export function AIAssistant({ sessionId, onSessionCreate }: AIAssistantProps) {
   const scrollRef       = useRef<HTMLDivElement>(null)
   const inputRef        = useRef<HTMLTextAreaElement>(null)
   const isNearBottomRef = useRef(true)
+  const messagesRef     = useRef<Message[]>(messages)
 
   // Auto-focus input on mount
   useEffect(() => { inputRef.current?.focus() }, [])
+
+  // Keep ref in sync so handleSend always reads the latest messages (avoids stale closure)
+  useEffect(() => { messagesRef.current = messages }, [messages])
 
   // Save messages to localStorage whenever they change
   useEffect(() => {
@@ -114,7 +118,7 @@ export function AIAssistant({ sessionId, onSessionCreate }: AIAssistantProps) {
     ])
 
     try {
-      const history = messages.slice(-6).map((m) => ({ role: m.role, content: m.content }))
+      const history = messagesRef.current.slice(-6).map((m) => ({ role: m.role, content: m.content }))
 
       for await (const event of chatStream(trimmed, history)) {
         if (event.type === "token") {
