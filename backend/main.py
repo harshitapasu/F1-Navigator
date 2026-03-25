@@ -23,7 +23,7 @@ from auth import AuthHandler
 from database import Database
 from news import fetch_f1_news, force_refresh, warm_cache
 from notifications import run_daily_notifications
-from rag import hybrid_search, stream_chat
+from rag import classify_query, hybrid_search, stream_chat, stream_chitchat
 
 # ── App setup ─────────────────────────────────────────────────────────────────
 
@@ -225,9 +225,19 @@ async def chat(req: ChatRequest, user_id: Optional[str] = Depends(optional_user)
     profile = await db.get_profile(user_id) if user_id else {}
 
     async def generate():
-        # Retrieve relevant chunks (runs in thread pool via asyncio — sync call)
         import asyncio
 
+        # Step 1: classify the query
+        query_type = await classify_query(req.message)
+
+        # Step 2: chitchat — skip RAG entirely, respond casually
+        if query_type == "chitchat":
+            async for token in stream_chitchat(req.message, profile):
+                yield "data: " + json.dumps({"type": "token", "content": token}) + "\n\n"
+            yield "data: [DONE]\n\n"
+            return
+
+        # Step 3: knowledge or followup — run RAG pipeline
         loop   = asyncio.get_event_loop()
         chunks = await loop.run_in_executor(None, hybrid_search, req.message)
 
