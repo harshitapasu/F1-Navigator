@@ -304,12 +304,12 @@ function HomeContent() {
         <div className="flex h-11 flex-shrink-0 items-center border-b border-border/40 px-3 print:hidden">
           <button
             onClick={() => setSidebarOpen((o) => !o)}
-            className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+            className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
             title={sidebarOpen ? "Close sidebar" : "Open sidebar"}
           >
             {sidebarOpen
-              ? <PanelLeftClose className="h-4 w-4" />
-              : <PanelLeftOpen  className="h-4 w-4" />}
+              ? <PanelLeftClose className="h-6 w-6" />
+              : <PanelLeftOpen  className="h-6 w-6" />}
           </button>
           {activeView !== "chat" && (
             <span className="ml-2 text-sm font-medium text-muted-foreground">

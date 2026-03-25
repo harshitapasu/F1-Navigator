@@ -655,7 +655,7 @@ export function WorkAuthorizationFlowchart({ externalProcess, onProcessChange, g
                 <CardContent className="overflow-x-hidden">
                   <div className="relative">
                     {/* Timeline line */}
-                    <div className="absolute left-4 top-0 hidden h-full w-0.5 bg-border sm:block" />
+                    <div className="absolute left-4 top-0 h-full w-0.5 bg-border" />
                     
                     <div className="space-y-4">
                       {currentProcess.steps.map((step, index) => (
@@ -666,7 +666,7 @@ export function WorkAuthorizationFlowchart({ externalProcess, onProcessChange, g
                         >
                           <div className="relative flex gap-4">
                             {/* Timeline dot — click to mark complete */}
-                            <div className="hidden flex-shrink-0 sm:block">
+                            <div className="flex-shrink-0">
                               <button
                                 onClick={(e) => toggleCompleted(step.id, e)}
                                 title={completedSteps.includes(step.id) ? "Mark as incomplete" : "Mark as done"}
