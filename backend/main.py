@@ -53,14 +53,14 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="F1 Navigator API", lifespan=lifespan)
 
-# Parse multiple frontend URLs from comma-separated env var
-frontend_urls = os.getenv("FRONTEND_URL", "").split(",")
-frontend_urls = [url.strip() for url in frontend_urls if url.strip()]
-frontend_urls.append("http://localhost:3000")  # Always allow localhost
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=frontend_urls,
+    allow_origins=[
+        "http://localhost:3000",
+        "https://f1-navigator-harshitapasus-projects.vercel.app",
+        "https://f1-navigator.vercel.app",
+        os.getenv("FRONTEND_URL", ""),
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
