@@ -1,5 +1,10 @@
 {
-  "buildCommand": "cd frontend && npm run build",
-  "outputDirectory": "frontend/.next",
-  "framework": "nextjs"
+  "projects": [
+    {
+      "name": "f1-navigator-frontend",
+      "path": "frontend",
+      "buildCommand": "npm run build",
+      "outputDirectory": ".next"
+    }
+  ]
 }
