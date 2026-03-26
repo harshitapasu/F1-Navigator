@@ -7,14 +7,11 @@ FROM node:18-alpine AS frontend-builder
 
 WORKDIR /app/frontend
 
-# Copy frontend files
-COPY frontend/package.json frontend/pnpm-lock.yaml ./
+# Copy ALL frontend files first
+COPY frontend/ .
 
 # Install dependencies
 RUN npm install -g pnpm && pnpm install
-
-# Copy rest of frontend source
-COPY frontend/ .
 
 # Build Next.js
 RUN pnpm build
