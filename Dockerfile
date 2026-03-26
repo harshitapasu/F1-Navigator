@@ -13,8 +13,9 @@ COPY frontend/ .
 # Install dependencies
 RUN npm install -g pnpm && pnpm install
 
-# Build Next.js
-RUN pnpm build
+
+# Build Next.js static export
+RUN pnpm build && pnpm export
 
 # ============================================================================
 # Stage 2: Runtime - Backend + Frontend Assets
@@ -30,9 +31,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy backend code
 COPY backend/ .
 
-# Copy built frontend from Stage 1
-COPY --from=frontend-builder /app/frontend/.next ./static/.next
-COPY --from=frontend-builder /app/frontend/public ./static/public
+
+# Copy static export from Stage 1
+COPY --from=frontend-builder /app/frontend/out ./static
 
 # Expose port
 EXPOSE 8000
