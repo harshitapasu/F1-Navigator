@@ -11,7 +11,7 @@ WORKDIR /app/frontend
 COPY frontend/package.json frontend/pnpm-lock.yaml ./
 
 # Install dependencies
-RUN npm install -g pnpm && pnpm install --frozen-lockfile
+RUN npm install -g pnpm && pnpm install
 
 # Copy rest of frontend source
 COPY frontend/ .
