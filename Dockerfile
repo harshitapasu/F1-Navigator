@@ -26,9 +26,6 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install Node.js for serving frontend (optional, or use Python)
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
-
 # Copy backend requirements and install
 COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
@@ -40,12 +37,8 @@ COPY backend/ .
 COPY --from=frontend-builder /app/frontend/.next ./static/.next
 COPY --from=frontend-builder /app/frontend/public ./static/public
 
-# Expose ports
+# Expose port
 EXPOSE 8000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:8000/health || exit 1
-
-# Start backend (which will serve frontend via static files or reverse proxy)
+# Start backend
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
