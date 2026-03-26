@@ -3,7 +3,7 @@
 # ============================================================================
 # Stage 1: Build Frontend (Next.js)
 # ============================================================================
-FROM node:18-alpine AS frontend-builder
+FROM node:20-alpine AS frontend-builder
 
 WORKDIR /app/frontend
 
