@@ -1,0 +1,17 @@
+node_modules
+.next
+.venv
+__pycache__
+*.pyc
+.git
+.gitignore
+.env
+.env.local
+README.md
+.DS_Store
+.pytest_cache
+.mypy_cache
+dist
+build
+*.egg-info
+.vscode

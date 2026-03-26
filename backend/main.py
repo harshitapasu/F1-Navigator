@@ -53,12 +53,12 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="F1 Navigator API", lifespan=lifespan)
 
+# CORS configuration - allow requests from any Railway domain + localhost for development
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",
-        "https://f1-navigator-harshitapasus-projects.vercel.app",
-        "https://f1-navigator.vercel.app",
+        "http://localhost:8000",
         os.getenv("FRONTEND_URL", ""),
     ],
     allow_credentials=True,
